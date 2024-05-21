@@ -169,5 +169,25 @@
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Drivers/BSP/STM32H7xx_Nucleo/stm32h7xx_nucleo.c</locationURI>
 		</link>
+		<link>
+			<name>Middlewares/Third_Party/FatFs/diskio.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/diskio.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FatFs/ff.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/ff.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FatFs/ff_gen_drv.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/ff_gen_drv.c</locationURI>
+		</link>
+		<link>
+			<name>Middlewares/Third_Party/FatFs/syscall.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Middlewares/Third_Party/FatFs/src/option/syscall.c</locationURI>
+		</link>
 	</linkedResources>
 </projectDescription>

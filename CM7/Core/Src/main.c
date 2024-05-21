@@ -62,10 +62,22 @@ static void MX_GPIO_Init(void);
 static void MX_SDMMC1_SD_Init(void);
 /* USER CODE BEGIN PFP */
 
+static void FS_FileOperations(void);
+static uint8_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint32_t BufferLength);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
+uint8_t workBuffer[_MAX_SS];
+
+/*
+ * ensure that the read buffer 'rtext' is 32-Byte aligned in address and size
+ * to guarantee that any other data in the cache won't be affected when the 'rtext'
+ * is being invalidated.
+ */
+ALIGN_32BYTES(uint8_t rtext[96]);
 
 /* USER CODE END 0 */
 
@@ -166,6 +178,9 @@ int main(void)
   /* USER CODE BEGIN BSP */
   /* -- Sample board code to send message over COM1 port ---- */
   printf("Program Starting... \r\n");
+
+  FS_FileOperations();
+
   /* USER CODE END BSP */
 
   /* Infinite loop */
@@ -182,7 +197,8 @@ int main(void)
       /* Update button state */
       BspButtonState = BUTTON_RELEASED;
       /* ..... Perform your action ..... */
-      printf("EventCallback: Button has been pressed!\r\n");
+      printf("[STM32H755/CORE_CM7] EventCallback: Button has been pressed!\r\n");
+      printf("[STM32H755/CORE_CM7] uSD_Detect: %d!\r\n", BSP_PlatformIsDetected());
     }
   }
   /* USER CODE END 3 */
@@ -348,6 +364,86 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+static void FS_FileOperations(void)
+{
+  FRESULT res; /* FatFs function common result code */
+  uint32_t bytesWritten, bytesRead; /* File write/read counts */
+  uint8_t wtext[] = "[STM32H755/CORE_CM7]:This is STM32 working with FatFs + DMA"; /* File write buffer */
+
+  /* Register the file system object to the FatFs module */
+  if (f_mount(&SDFatFS, (TCHAR const*) SDPath, 0) == FR_OK)
+  {
+    printf("[STM32H755/CORE_CM7/FatFs]: Successfully mounted SD Card\n");
+    /* Create a FAT file system (format) on the logical drive */
+//    if (f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, workBuffer, sizeof(workBuffer)) == FR_OK)
+//    {
+    /* Create and Open a new text file object with write access */
+    if (f_open(&SDFile, "STM32.TXT", FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)
+    {
+      printf("[STM32H755/CORE_CM7/FatFs]: Successfully to opened file!!\n");
+      /* Write data to the text file */
+      res = f_write(&SDFile, wtext, sizeof(wtext), (void*) &bytesWritten);
+
+      if ((bytesWritten > 0) && (res == FR_OK))
+      {
+        printf("[STM32H755/CORE_CM7/FatFs]: Data successfully written to file!!\n");
+        /* Close the open text file */
+        f_close(&SDFile);
+
+        /* Open the text file object with read access */
+        if (f_open(&SDFile, "STM32.TXT", FA_READ) == FR_OK)
+        {
+          printf("[STM32H755/CORE_CM7/FatFs]: Successfully to opened file!!\n");
+          /* Read data from the text file */
+          res = f_read(&SDFile, rtext, sizeof(rtext), (void*) &bytesRead);
+
+          if ((bytesRead > 0) && (res == FR_OK))
+          {
+            printf("[STM32H755/CORE_CM7/FatFs]: Data successfully read from file!!\n");
+            /* Close the open text file */
+            f_close(&SDFile);
+
+            /* Compare read data with the expected data */
+            if (Buffercmp(rtext, wtext, bytesWritten) == 0)
+            {
+              /* Success of the demo: no error occurrence */
+              printf("[STM32H755/CORE_CM7/FatFs]: Data written and read are identical!!\n");
+              // BSP_LED_On(LED_GREEN);
+              BSP_LED_On(LED_GREEN);
+              return;
+            }
+          }
+        }
+      }
+    }
+//    }
+  }
+  /* Error */
+  Error_Handler();
+}
+
+/**
+ * @brief  Compares two buffers.
+ * @param  pBuffer1, pBuffer2: buffers to be compared.
+ * @param  BufferLength: buffer's length
+ * @retval 1: pBuffer identical to pBuffer1
+ *         0: pBuffer differs from pBuffer1
+ */
+static uint8_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint32_t BufferLength)
+{
+  while (BufferLength--)
+  {
+    if (*pBuffer1 != *pBuffer2)
+    {
+      return 1;
+    }
+
+    pBuffer1++;
+    pBuffer2++;
+  }
+  return 0;
+}
+
 /* USER CODE END 4 */
 
  /* MPU Configuration */
@@ -400,9 +496,12 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-  __disable_irq();
+//  __disable_irq();
+  BSP_LED_On(LED_RED);
   while (1)
   {
+    BSP_LED_Toggle(LED_RED);
+    HAL_Delay(50);
   }
   /* USER CODE END Error_Handler_Debug */
 }

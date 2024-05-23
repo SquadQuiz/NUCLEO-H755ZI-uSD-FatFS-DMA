@@ -179,9 +179,11 @@ int main(void)
   /* -- Sample board code to send message over COM1 port ---- */
   printf("Program Starting... \r\n");
 
-  BSP_LED_On(LED_GREEN);
+  BSP_LED_On(LED_YELLOW);
 
   FS_FileOperations();
+
+  BSP_LED_Off(LED_YELLOW);
 
   /* USER CODE END BSP */
 
@@ -508,7 +510,7 @@ void Error_Handler(void)
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
 //  __disable_irq();
-  BSP_LED_Off(LED_GREEN);
+  BSP_LED_Off(LED_YELLOW);
   BSP_LED_On(LED_RED);
   while (1)
   {

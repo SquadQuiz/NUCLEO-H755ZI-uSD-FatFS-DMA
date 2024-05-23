@@ -62,6 +62,7 @@ static void MX_GPIO_Init(void);
 static void MX_SDMMC1_SD_Init(void);
 /* USER CODE BEGIN PFP */
 
+static void FS_FormatDisk(void);
 static void FS_FileOperations(void);
 static uint8_t Buffercmp(uint8_t* pBuffer1, uint8_t* pBuffer2, uint32_t BufferLength);
 
@@ -181,6 +182,7 @@ int main(void)
 
   BSP_LED_On(LED_YELLOW);
 
+  FS_FormatDisk();
   FS_FileOperations();
 
   BSP_LED_Off(LED_YELLOW);
@@ -367,6 +369,26 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+
+static void FS_FormatDisk(void)
+{
+  FRESULT fres; /* FatFs function common result code */
+
+  /* Register the file system object to the FatFs module */
+  fres = f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+  if (fres == FR_OK)
+  {
+    printf("[STM32H755/CORE_CM7/FatFs]: Successfully mounted SD Card\n");
+    fres = f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
+    if (fres == FR_OK)
+    {
+      printf("[STM32H755/CORE_CM7/FatFs]: Successfully formatted SD Card\n");
+      return;
+    }
+  }
+  /* Error */
+  Error_Handler();
+}
 
 static void FS_FileOperations(void)
 {

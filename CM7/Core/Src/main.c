@@ -182,7 +182,7 @@ int main(void)
 
   BSP_LED_On(LED_YELLOW);
 
-  FS_FormatDisk();
+//  FS_FormatDisk();
   FS_FileOperations();
 
   BSP_LED_Off(LED_YELLOW);
@@ -203,8 +203,7 @@ int main(void)
       /* Update button state */
       BspButtonState = BUTTON_RELEASED;
       /* ..... Perform your action ..... */
-      printf("[STM32H755/CORE_CM7] EventCallback: Button has been pressed!\r\n");
-      printf("[STM32H755/CORE_CM7] uSD_Detect: %d!\r\n", BSP_PlatformIsDetected());
+      printf("[STM32H755/CORE_CM7] EventCallback: User Button has been pressed!\r\n");
     }
   }
   /* USER CODE END 3 */

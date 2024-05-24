@@ -421,7 +421,6 @@ static void FS_FileOperations(void)
   FRESULT res;                      /* FatFs function common result code */
   uint32_t bytesWritten, bytesRead; /* File write/read counts */
   uint8_t wtext[] = "[CORE_CM7]: This is STM32 working with FatFs + DMA"; /* File write buffer */
-  uint8_t rtext[100]; /* File read buffer (ensure it's large enough) */
 
   /* Mount the file system */
   res = f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);

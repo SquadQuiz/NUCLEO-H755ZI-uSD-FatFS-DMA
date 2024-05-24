@@ -369,15 +369,27 @@ static void MX_GPIO_Init(void)
 
 /* USER CODE BEGIN 4 */
 
+/**
+ * @brief Format the disk with the FatFs file system.
+ * 
+ * This function mounts the file system, formats the SD card,
+ * and provides diagnostic prints for each step. If any operation
+ * fails, it calls Error_Handler().
+ * 
+ * @note Ensure that the file system is properly mounted and the
+ *       SD card is inserted before calling this function.
+ */
 static void FS_FormatDisk(void)
 {
   FRESULT fres; /* FatFs function common result code */
 
-  /* Register the file system object to the FatFs module */
+  /* Mount the file system */
   fres = f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
   if (fres == FR_OK)
   {
     printf("[CORE_CM7/FatFs]: Successfully mounted SD Card\n");
+
+    /* Format the file system */
     fres = f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
     if (fres == FR_OK)
     {
@@ -385,7 +397,8 @@ static void FS_FormatDisk(void)
       return;
     }
   }
-  /* Error */
+
+  /* Error handling */
   Error_Handler();
 }
 

@@ -178,7 +178,7 @@ int main(void)
 
   /* USER CODE BEGIN BSP */
   /* -- Sample board code to send message over COM1 port ---- */
-  printf("Program Starting... \r\n");
+  printf("[CORE_CM7]: Program Starting... \r\n");
 
   BSP_LED_On(LED_YELLOW);
 
@@ -203,7 +203,7 @@ int main(void)
       /* Update button state */
       BspButtonState = BUTTON_RELEASED;
       /* ..... Perform your action ..... */
-      printf("[STM32H755/CORE_CM7] EventCallback: User Button has been pressed!\r\n");
+      printf("[CORE_CM7] EventCallback: User Button has been pressed!\r\n");
     }
   }
   /* USER CODE END 3 */
@@ -377,11 +377,11 @@ static void FS_FormatDisk(void)
   fres = f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
   if (fres == FR_OK)
   {
-    printf("[STM32H755/CORE_CM7/FatFs]: Successfully mounted SD Card\n");
+    printf("[CORE_CM7/FatFs]: Successfully mounted SD Card\n");
     fres = f_mkfs((TCHAR const*)SDPath, FM_ANY, 0, workBuffer, sizeof(workBuffer));
     if (fres == FR_OK)
     {
-      printf("[STM32H755/CORE_CM7/FatFs]: Successfully formatted SD Card\n");
+      printf("[CORE_CM7/FatFs]: Successfully formatted SD Card\n");
       return;
     }
   }
@@ -389,57 +389,113 @@ static void FS_FormatDisk(void)
   Error_Handler();
 }
 
+/**
+ * @brief Performs file operations on an SD card using the FatFs library.
+ *
+ * This function mounts the file system, creates and opens a text file for writing,
+ * writes data to the file, closes the file, then reopens it for reading, and finally
+ * reads the data back. It compares the read data with the written data to ensure
+ * the integrity of the file operations. If any operation fails, it calls the 
+ * Error_Handler() function.
+ *
+ * @note Ensure that the file system is properly mounted and the
+ *       SD card is inserted before calling this function.
+ *
+ * @return void
+ */
 static void FS_FileOperations(void)
 {
   FRESULT res;                      /* FatFs function common result code */
   uint32_t bytesWritten, bytesRead; /* File write/read counts */
-  uint8_t wtext[] = "[STM32H755/CORE_CM7]:This is STM32 working with FatFs + DMA"; /* File write buffer */
+  uint8_t wtext[] = "[CORE_CM7]: This is STM32 working with FatFs + DMA"; /* File write buffer */
+  uint8_t rtext[100]; /* File read buffer (ensure it's large enough) */
 
-  /* Register the file system object to the FatFs module */
-  if (f_mount(&SDFatFS, (TCHAR const*)SDPath, 0) == FR_OK)
+  /* Mount the file system */
+  res = f_mount(&SDFatFS, (TCHAR const*)SDPath, 0);
+  if (res != FR_OK)
   {
-    printf("[STM32H755/CORE_CM7/FatFs]: Successfully mounted SD Card\n");
-    /* Create and Open a new text file object with write access */
-    if (f_open(&SDFile, "STM32.TXT", FA_CREATE_ALWAYS | FA_WRITE) == FR_OK)
+    printf("[CORE_CM7/FatFs]: Failed to mount SD card (error code: %d)\n", res);
+    Error_Handler();
+  }
+  else
+  {
+    printf("[CORE_CM7/FatFs]: Successfully mounted SD Card\n");
+
+    /* Open or create a new text file for writing */
+    res = f_open(&SDFile, "STM32.TXT", FA_CREATE_ALWAYS | FA_WRITE);
+    if (res != FR_OK)
     {
-      printf("[STM32H755/CORE_CM7/FatFs]: Successfully to opened file!!\n");
+      printf("[CORE_CM7/FatFs]: Failed to open file for writing (error code: %d)\n", res);
+      Error_Handler();
+    }
+    else
+    {
+      printf("[CORE_CM7/FatFs]: Successfully opened file for writing\n");
+
       /* Write data to the text file */
       res = f_write(&SDFile, wtext, sizeof(wtext), (void*)&bytesWritten);
-
-      if ((bytesWritten > 0) && (res == FR_OK))
+      if (res != FR_OK || bytesWritten != sizeof(wtext))
       {
-        printf("[STM32H755/CORE_CM7/FatFs]: Data successfully written to file!!\n");
-        /* Close the open text file */
+        printf("[CORE_CM7/FatFs]: Failed to write data to file (error code: %d, bytes "
+               "written: %lu)\n",
+               res, bytesWritten);
+        Error_Handler();
+      }
+      else
+      {
+        printf("[CORE_CM7/FatFs]: Data successfully written to file (bytes written: %lu)\n",
+               bytesWritten);
+
+        /* Close the text file after writing */
         f_close(&SDFile);
 
-        /* Open the text file object with read access */
-        if (f_open(&SDFile, "STM32.TXT", FA_READ) == FR_OK)
+        /* Open the text file for reading */
+        res = f_open(&SDFile, "STM32.TXT", FA_READ);
+        if (res != FR_OK)
         {
-          printf("[STM32H755/CORE_CM7/FatFs]: Successfully to opened file!!\n");
-          /* Read data from the text file */
-          res = f_read(&SDFile, rtext, sizeof(rtext), (void*)&bytesRead);
+          printf("[CORE_CM7/FatFs]: Failed to open file for reading (error code: %d)\n", res);
+          Error_Handler();
+        }
+        else
+        {
+          printf("[CORE_CM7/FatFs]: Successfully opened file for reading\n");
 
-          if ((bytesRead > 0) && (res == FR_OK))
+          /* Read data from the text file */
+          res = f_read(&SDFile, rtext, sizeof(wtext), (void*)&bytesRead);
+          if (res != FR_OK || bytesRead != bytesWritten)
           {
-            printf("[STM32H755/CORE_CM7/FatFs]: Data successfully read from file!!\n");
-            /* Close the open text file */
+            printf("[CORE_CM7/FatFs]: Failed to read the correct amount of data (error code: %d, "
+                   "bytes read: %lu, expected: %lu)\n",
+                   res, bytesRead, bytesWritten);
+            Error_Handler();
+          }
+          else
+          {
+            printf("[CORE_CM7/FatFs]: Data successfully read from file (bytes read: %lu)\n",
+                   bytesRead);
+
+            /* Close the text file after reading */
             f_close(&SDFile);
 
-            /* Compare read data with the expected data */
+            /* Compare read data with the written data */
             if (Buffercmp(rtext, wtext, bytesWritten) == 0)
             {
-              /* Success of the demo: no error occurrence */
-              printf("[STM32H755/CORE_CM7/FatFs]: Data written and read are identical!!\n");
-              // BSP_LED_On(LED_GREEN);
+              printf("[CORE_CM7/FatFs]: Data written and read are identical\n");
               BSP_LED_On(LED_GREEN);
               return;
+            }
+            else
+            {
+              printf("[CORE_CM7/FatFs]: Data mismatch\n");
+              Error_Handler();
             }
           }
         }
       }
     }
   }
-  /* Error */
+
+  /* If any error occurs, handle it here */
   Error_Handler();
 }
 

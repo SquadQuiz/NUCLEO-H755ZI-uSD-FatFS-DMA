@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>NUCLEO-H755ZI-FatFS-uSD</name>
+	<name>NUCLEO-H755ZI-uSD-FatFS-DMA</name>
 	<comment></comment>
 	<projects>
 	</projects>

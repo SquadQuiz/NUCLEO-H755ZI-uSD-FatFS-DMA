@@ -423,6 +423,7 @@
   - [MB1363-H755ZIQ-D01 Schematics](https://www.st.com/resource/en/schematic_pack/mb1363-h755ziq-d01_schematic.pdf)
 - Application Note
   - [AN5361 Getting started with projects based on dual-core STM32H7 microcontrollers in STM32CubeIDE](https://www.st.com/resource/en/application_note/an5361-getting-started-with-projects-based-on-dualcore-stm32h7-microcontrollers-in-stm32cubeide-stmicroelectronics.pdf)
+  - [AN5286 STM32H7x5/x7 dual-core microcontroller debugging](https://www.st.com/content/ccc/resource/technical/document/application_note/group1/96/bf/35/36/e6/97/42/2e/DM00597308/files/DM00597308.pdf/jcr:content/translations/en.DM00597308.pdf)
   - [AN5200 Getting started with STM32H7 MCUs SDMMC host controller](https://www.st.com/resource/en/application_note/dm00525510-getting-started-with-stm32h7-series-sdmmc-host-controller-stmicroelectronics.pdf)
   - [AN4838 Introduction to memory protection unit management on STM32 MCUs](https://www.st.com/resource/en/application_note/an4838-introduction-to-memory-protection-unit-management-on-stm32-mcus-stmicroelectronics.pdf)
   - [AN4839 Level 1 cache on STM32F7 Series and STM32H7 Series](https://www.st.com/resource/en/application_note/an4839-level-1-cache-on-stm32f7-series-and-stm32h7-series-stmicroelectronics.pdf)
